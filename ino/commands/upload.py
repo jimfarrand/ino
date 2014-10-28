@@ -32,6 +32,9 @@ class Upload(Command):
         parser.add_argument('-p', '--serial-port', metavar='PORT',
                             help='Serial port to upload firmware to\nTry to guess if not specified')
 
+        parser.add_argument('-e', '--auto-erase', metavar='<0|1>', default='0',
+                            help='Enable auto-erase of firmware\npass 1 for yes, 0 (default) for no')
+
         self.e.add_board_model_arg(parser)
         self.e.add_arduino_dist_arg(parser)
 
@@ -50,6 +53,7 @@ class Upload(Command):
     def run(self, args):
         self.discover()
         port = args.serial_port or self.e.guess_serial_port()
+        erase = args.auto_erase
         board = self.e.board_model(args.board_model)
 
         protocol = board['upload']['protocol']
@@ -126,13 +130,15 @@ class Upload(Command):
             port = new_port
 
         # call avrdude to upload .hex
-        subprocess.call([
+        avrargs = [
             self.e['avrdude'],
             '-C', self.e['avrdude.conf'],
             '-p', board['build']['mcu'],
             '-P', port,
             '-c', protocol,
             '-b', board['upload']['speed'],
-            '-D',
-            '-U', 'flash:w:%s:i' % self.e['hex_path'],
-        ])
+            '-U', 'flash:w:%s:i' % self.e['hex_path']
+            ]
+        if (args.auto_erase == '0'):
+            avrargs.append('-D')
+        subprocess.call(avrargs)
