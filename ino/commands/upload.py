@@ -53,7 +53,6 @@ class Upload(Command):
     def run(self, args):
         self.discover()
         port = args.serial_port or self.e.guess_serial_port()
-        erase = args.auto_erase
         board = self.e.board_model(args.board_model)
 
         protocol = board['upload']['protocol']
@@ -138,7 +137,7 @@ class Upload(Command):
             '-c', protocol,
             '-b', board['upload']['speed'],
             '-U', 'flash:w:%s:i' % self.e['hex_path']
-            ]
+        ]
         if (args.auto_erase == '0'):
             avrargs.append('-D')
         subprocess.call(avrargs)
