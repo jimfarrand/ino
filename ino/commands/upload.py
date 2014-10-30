@@ -138,6 +138,8 @@ class Upload(Command):
             '-b', board['upload']['speed'],
             '-U', 'flash:w:%s:i' % self.e['hex_path']
         ]
+
         if (args.auto_erase == '0'):
             avrargs.append('-D')
+
         subprocess.call(avrargs)
